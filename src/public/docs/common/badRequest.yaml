@@ -1,0 +1,11 @@
+description: Invalid parameters user gives
+content:
+  application/json:
+    schema:
+      type: object
+      properties:
+        message:
+          type: string
+          default: bad request
+      required:
+        - message

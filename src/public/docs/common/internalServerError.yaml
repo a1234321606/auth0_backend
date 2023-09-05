@@ -1,0 +1,11 @@
+description: Error occurs in server
+content:
+  application/json:
+    schema:
+      type: object
+      properties:
+        message:
+          type: string
+          default: internal server error
+      required:
+        - message

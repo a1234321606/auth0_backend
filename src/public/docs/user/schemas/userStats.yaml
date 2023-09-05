@@ -1,0 +1,18 @@
+type: object
+properties:
+  time:
+    type: array
+    items:
+      type: string
+  counts:
+    type: array
+    items:
+      type: integer
+  users:
+    type: array
+    items:
+      type: integer
+example:
+  time: ["2023-09-04"]
+  counts: [8]
+  users: [3]

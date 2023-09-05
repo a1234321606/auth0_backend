@@ -1,0 +1,194 @@
+openapi: 3.0.0
+info:
+  title: API Document
+  description: RESTful API for Users
+  version: v1
+security:
+  - oAuth2: []
+tags:
+  - name: User
+paths:
+  /api/v1/users:
+    get:
+      description: Get user list
+      summary: API 1.1.1
+      tags:
+        - User
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: schemas/user.yaml
+        400:
+          $ref: ../common/badRequest.yaml
+        401:
+          $ref: ../common/unauthorized.yaml
+        403:
+          $ref: ../common/forbidden.yaml
+        500:
+          $ref: ../common/internalServerError.yaml
+    put:
+      description: Update user by access token
+      summary: API 1.1.2
+      tags:
+        - User
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: schemas/userUpdate.yaml
+      responses:
+        200:
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: schemas/user.yaml
+        400:
+          $ref: ../common/badRequest.yaml
+        401:
+          $ref: ../common/unauthorized.yaml
+        403:
+          $ref: ../common/forbidden.yaml
+        500:
+          $ref: ../common/internalServerError.yaml
+    delete:
+      description: delete user by access token
+      summary: API 1.1.3
+      tags:
+        - User
+      responses:
+        204:
+          description: Deleted
+        400:
+          $ref: ../common/badRequest.yaml
+        401:
+          $ref: ../common/unauthorized.yaml
+        403:
+          $ref: ../common/forbidden.yaml
+        500:
+          $ref: ../common/internalServerError.yaml
+  /api/v1/users/profile:
+    get:
+      description: Get user by access token
+      summary: API 1.1.4
+      tags:
+        - User
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: schemas/user.yaml
+        400:
+          $ref: ../common/badRequest.yaml
+        401:
+          $ref: ../common/unauthorized.yaml
+        403:
+          $ref: ../common/forbidden.yaml
+        500:
+          $ref: ../common/internalServerError.yaml
+  /api/v1/users/verify-email:
+    post:
+      description: Send verification email to user by access token
+      summary: API 1.1.5
+      tags:
+        - User
+      responses:
+        200:
+          description: OK
+        400:
+          $ref: ../common/badRequest.yaml
+        401:
+          $ref: ../common/unauthorized.yaml
+        403:
+          $ref: ../common/forbidden.yaml
+        500:
+          $ref: ../common/internalServerError.yaml
+  /api/v1/users/change-password:
+    post:
+      description: Change user password by access token
+      summary: API 1.1.6
+      tags:
+        - User
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: schemas/userPassword.yaml
+      responses:
+        200:
+          description: OK
+        400:
+          $ref: ../common/badRequest.yaml
+        401:
+          $ref: ../common/unauthorized.yaml
+        403:
+          $ref: ../common/forbidden.yaml
+        500:
+          $ref: ../common/internalServerError.yaml
+  /api/v1/users/stats:
+    get:
+      description: "Get log statistics according to the types & time range.
+        Return the trigger count & user count of the all given types in the given time range."
+      summary: API 1.1.7
+      tags:
+        - User
+      parameters:
+        - name: types
+          in: query
+          description: "A list of log type. Ref: https://auth0.com/docs/deploy-monitor/logs/log-event-type-codes"
+          required: true
+          schema:
+            type: array
+            items:
+              type: string
+              example: s
+          style: form
+          explode: true
+        - name: start_timestamp
+          in: query
+          description: The timestamp of start time
+          required: true
+          schema:
+            type: integer
+            example: 1693756800000
+        - name: end_timestamp
+          in: query
+          description: The timestamp of end time
+          required: true
+          schema:
+            type: integer
+            example: 1693843199000
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: schemas/userStats.yaml
+        400:
+          $ref: ../common/badRequest.yaml
+        401:
+          $ref: ../common/unauthorized.yaml
+        403:
+          $ref: ../common/forbidden.yaml
+        500:
+          $ref: ../common/internalServerError.yaml
+components:
+  securitySchemes:
+    oAuth2:
+      type: oauth2
+      description: These APIs use OAuth 2 with the password grant flow
+      flows:
+        password:
+          tokenUrl: https://khl.jp.auth0.com/oauth/token
+          refreshUrl: https://khl.jp.auth0.com/oauth/token
+          scopes: {}
