@@ -1,5 +1,5 @@
 {
-  "prefix": "/api",
+  "prefix": "api",
   "version": "v1",
   "port": 3003,
   "auth": {

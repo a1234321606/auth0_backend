@@ -52,6 +52,7 @@ const getStatistics = async (types: string[], startTimestamp: number, endTimesta
   }
 
   // NOTE: Cannot use fetchLogs in while loop because of "unexpected `await` inside a loop. eslint(no-await-in-loop)"
+  const logs: any = [];
   const fetchLogs = async (page: number = 0) => {
     const data = await auth0.getLogs({
       q: `(${codes})${dates && ` AND ${dates}`}`,
@@ -61,10 +62,10 @@ const getStatistics = async (types: string[], startTimestamp: number, endTimesta
       per_page: 100,
       page,
     });
-    if (data.length === data.limit) data.push(...(await fetchLogs(page + 1)));
-    return data;
+    logs.push(...data.logs);
+    if (data.length === data.limit) await fetchLogs(page + 1);
   };
-  const data = await fetchLogs();
+  await fetchLogs();
 
   let cur = DateTime.fromMillis(startTimestamp, { zone });
   let count = 0;
@@ -74,14 +75,14 @@ const getStatistics = async (types: string[], startTimestamp: number, endTimesta
     counts: [],
     users: [],
   };
-  for (let i = 0; i <= data.logs.length;) {
+  for (let i = 0; i <= logs.length;) {
     // NOTE: Cannot use continue because of "unexpected use of continue statement. eslint(no-continue)"
     let isContinue = false;
-    if (data.logs[i]) {
-      const time = DateTime.fromISO(data.logs[i].date, { zone });
+    if (logs[i]) {
+      const time = DateTime.fromISO(logs[i].date, { zone });
       if (cur.toFormat('yyyy-MM-dd') === time.toFormat('yyyy-MM-dd')) {
         count += 1;
-        users.add(data.logs[i].user_id);
+        users.add(logs[i].user_id);
         i += 1;
         isContinue = true;
       }
@@ -92,7 +93,7 @@ const getStatistics = async (types: string[], startTimestamp: number, endTimesta
       result.users.push(users.size);
       count = 0;
       users.clear();
-      if (!data.logs[i]) break;
+      if (!logs[i]) break;
       cur = cur.plus({ day: 1 });
     }
   }

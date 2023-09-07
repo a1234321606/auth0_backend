@@ -4,12 +4,11 @@ import logger from 'koa-logger';
 import staticCache from 'koa-static-cache';
 import path from 'path';
 import bodyParser from 'koa-body';
-import jwt from 'koa-jwt';
-import jwksRsa from 'jwks-rsa';
 import config from './config';
-import router from './router';
-import trimMiddleware from './middleware/trimMiddleware';
-import exceptionMiddleware from './middleware/exceptionMiddleware';
+import router from './routers';
+import trimMiddleware from './middlewares/trimMiddleware';
+import exceptionMiddleware from './middlewares/exceptionMiddleware';
+import authMiddleware from './middlewares/authMiddleware';
 
 const app = new Koa();
 
@@ -32,15 +31,7 @@ app.use(bodyParser()).use(trimMiddleware());
 app.use(exceptionMiddleware());
 
 // Auth middleware
-app.use(jwt({
-  secret: jwksRsa.koaJwtSecret({
-    jwksUri: `https://${config.auth.domain}/.well-known/jwks.json`,
-    rateLimit: true,
-    jwksRequestsPerMinute: 5,
-  }),
-  audience: `https://${config.auth.domain}/api/v2/`,
-  issuer: `https://${config.auth.domain}/`,
-}).unless({ path: [...config.auth.unless, /\/*.yaml/] }));
+app.use(authMiddleware);
 
 // Static file service
 const staticCacheSrv = staticCache(path.join(__dirname, 'public'), { prefix: '/api', gzip: true });
@@ -51,4 +42,7 @@ app.use(staticCacheSrv);
 app.use(router.routes()).use(router.allowedMethods());
 
 // Start server
-app.listen(config.port, () => console.log('--- Backend server start to listen 3003 ---'));
+if (process.env.NODE_ENV !== 'test') {
+  app.listen(config.port, () => console.log(`--- Backend server start to listen ${config.port} ---`));
+}
+export default app;
