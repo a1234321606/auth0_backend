@@ -6,7 +6,6 @@
   "scripts": {
     "start": "npx nodemon src/index.ts",
     "test": "NODE_ENV=test jest --coverage --testTimeout=10000",
-    "coverage": "nyc --reporter=lcov --reporter=text-lcov npm test",
     "build": "npx tsc; cp -r src/public dist"
   },
   "keywords": [],
