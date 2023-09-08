@@ -31,7 +31,7 @@ app.use(bodyParser()).use(trimMiddleware());
 app.use(exceptionMiddleware());
 
 // Auth middleware
-app.use(authMiddleware);
+app.use(authMiddleware());
 
 // Static file service
 const staticCacheSrv = staticCache(path.join(__dirname, 'public'), { prefix: '/api', gzip: true });

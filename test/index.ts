@@ -17,7 +17,7 @@ const server = {
   close: () => srv.close(),
 };
 
-jest.mock('../src/middlewares/authMiddleware', () => {
+jest.mock('../src/middlewares/authMiddleware', () => () => {
   const fn = async (ctx: IRouterContext, next: Next) => {
     try {
       const t = ctx.request.header.authorization?.replace('Bearer ', '') || '';
