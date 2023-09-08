@@ -8,6 +8,7 @@ interface IUser {
   name?: string | null
   given_name?: string | null
   family_name?: string | null
+  email?: string
 }
 
 interface IUserReq extends IUser {
@@ -46,6 +47,9 @@ const verifyUser = (data: IUser) => {
   if (data.family_name != null) {
     if (!validator.isAlphabetic(data.family_name)) throw new ArgumentException(`Invalid family name: ${data.family_name}`);
     user.family_name = data.family_name === '' ? null : data.family_name;
+  }
+  if (data.email) {
+    if (!validator.isEmail(data.email)) throw new ArgumentException(`Invalid email: ${data.email}`);
   }
   if (!Object.keys(user).length) throw new ArgumentException('Invalid body parameter');
   return user;
