@@ -37,6 +37,12 @@ describe('User', () => {
       expect(res.statusCode).toBe(400);
       expect(res.body.message).toBe('Invalid family name: 456');
     });
+
+    it('shouldn\'t update user if email is invalid', async () => {
+      const res = await request.put('/users').set({ Authorization: token }).send({ ...data, email: 'email address' });
+      expect(res.statusCode).toBe(400);
+      expect(res.body.message).toBe('Invalid email: email address');
+    });
   });
 
   describe('DELETE /users', () => {
