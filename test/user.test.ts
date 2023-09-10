@@ -16,7 +16,9 @@ describe('User', () => {
   });
 
   describe('PUT /users', () => {
-    const data = { name: 'New Name', given_name: 'New', family_name: 'Name' };
+    const data = {
+      name: 'New Name', given_name: 'New', family_name: 'Name', email: 'unit_test@example.com',
+    };
 
     it('should update user by token', async () => {
       const res = await request.put('/users').set({ Authorization: token }).send(data);
