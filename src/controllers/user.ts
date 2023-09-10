@@ -50,6 +50,7 @@ const verifyUser = (data: IUser) => {
   }
   if (data.email) {
     if (!validator.isEmail(data.email)) throw new ArgumentException(`Invalid email: ${data.email}`);
+    user.email = data.email;
   }
   if (!Object.keys(user).length) throw new ArgumentException('Invalid body parameter');
   return user;
