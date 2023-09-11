@@ -8,6 +8,9 @@ const customRequestInterceptor = (req: any) => {
   if (req.url.endsWith('/token')) {
     // TODO: Find another way to add audience to request.
     req.body += '&audience=https://khl.jp.auth0.com/api/v2/';
+  } else if (req.url.match('/api/v1')) {
+    const tz = new Date().getTimezoneOffset() / -60;
+    req.headers['X-TimeZone'] = `UTC${tz > 0 ? `+${tz}` : tz}`;
   }
   return req;
 };

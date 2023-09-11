@@ -29,5 +29,14 @@
       "user": "$SMTP_ACCOUNT",
       "pass": "$SMTP_PASSWORD"
     }
+  },
+  "postgres": {
+    "host": "$DB_HOST",
+    "db": "$DB_NAME",
+    "user": "$DB_USER",
+    "password": "$DB_PASSWORD",
+    "port": 5432,
+    "max": 30,
+    "ssl": true
   }
 }

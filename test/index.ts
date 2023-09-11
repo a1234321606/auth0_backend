@@ -53,6 +53,13 @@ jest.mock('../src/utilities/mailer', () => ({
   sendPasswordChangeMail: jest.fn(),
 }));
 
+jest.mock('../src/utilities/pg', () => ({
+  query: jest.fn((sql: string) => {
+    if (sql.match('SELECT id, user_id, timestamp FROM auth0_session_logs')) return { rows: logs };
+    return undefined;
+  }),
+}));
+
 export default request(`http://localhost:${config.port}/${config.prefix}/${config.version}`);
 export {
   server,

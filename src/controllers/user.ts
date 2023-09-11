@@ -34,7 +34,7 @@ interface IQuery {
   end_timestamp: number
 }
 
-const verifyUser = (data: IUser) => {
+const verifyUser = (data: IUser = {}) => {
   const user: IUserReq = {};
   if (data.name != null) {
     if (!user.user_metadata) user.user_metadata = {};
@@ -64,7 +64,6 @@ const verifyPassword = (data: IPassword) => {
 };
 
 const verifyStatisticsQuery = (data: IQuery) => {
-  if (!data.types.length || data.types.some((t) => !t)) throw new ArgumentException(`Invalid types: ${data.types}`);
   if (!validator.isInteger(`${data.start_timestamp}`)) throw new ArgumentException(`Invalid start timestamp: ${data.start_timestamp}`);
   if (!validator.isInteger(`${data.end_timestamp}`)) throw new ArgumentException(`Invalid end timestamp: ${data.end_timestamp}`);
   if (data.start_timestamp > data.end_timestamp) throw new ArgumentException(`Invalid time range: ${data.start_timestamp}, ${data.end_timestamp}`);
@@ -84,9 +83,8 @@ const getUserById = async (ctx: IRouterContext) => {
 const getStatistics = async (ctx: IRouterContext) => {
   const tz = ctx.get('x-timezone') || 'UTC+8';
   const { query }: any = ctx.request;
-  if (!Array.isArray(query.types)) query.types = [query.types];
   verifyStatisticsQuery(query);
-  const data: any = await userService.getStatistics(query.types, +query.start_timestamp, +query.end_timestamp, tz);
+  const data: any = await userService.getStatistics(+query.start_timestamp, +query.end_timestamp, tz);
   responser.finalize(ctx, 200, data);
 };
 

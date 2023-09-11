@@ -2,6 +2,7 @@ import { DateTime } from 'luxon';
 import { ArgumentException } from '../utilities/responser/exceptions';
 import auth0 from '../api/auth0';
 import mailer from '../utilities/mailer';
+import userRepo from '../repositories/user';
 
 const format = (user: any) => ({
   user_id: user.user_id,
@@ -42,30 +43,10 @@ const changePassword = async (passwordData: any, id: string, email: string, user
   }
 };
 
-const getStatistics = async (types: string[], startTimestamp: number, endTimestamp: number, zone: string) => {
-  const codes: string = types.map((t) => `type:${t}`).join(' or ');
-  let dates: string | undefined;
-  if (startTimestamp && endTimestamp) {
-    const startTime: string = DateTime.fromMillis(startTimestamp).toUTC().toFormat('yyyy-MM-dd HH:mm:ss');
-    const endTime: string = DateTime.fromMillis(endTimestamp).toUTC().toFormat('yyyy-MM-dd HH:mm:ss');
-    dates = `date:[${startTime} TO ${endTime}]`;
-  }
-
-  // NOTE: Cannot use fetchLogs in while loop because of "unexpected `await` inside a loop. eslint(no-await-in-loop)"
-  const logs: any = [];
-  const fetchLogs = async (page: number = 0) => {
-    const data = await auth0.getLogs({
-      q: `(${codes})${dates && ` AND ${dates}`}`,
-      include_totals: true,
-      fields: 'user_id,user_name,type,date',
-      sort: 'date:1',
-      per_page: 100,
-      page,
-    });
-    logs.push(...data.logs);
-    if (data.length === data.limit) await fetchLogs(page + 1);
-  };
-  await fetchLogs();
+const getStatistics = async (startTimestamp: number, endTimestamp: number, zone: string) => {
+  const conditions = ['$1 <= timestamp', 'timestamp <= $2'];
+  const data = [startTimestamp, endTimestamp];
+  const logs = await userRepo.getSessionLogs(conditions, data);
 
   let cur = DateTime.fromMillis(startTimestamp, { zone });
   let count = 0;
@@ -79,7 +60,7 @@ const getStatistics = async (types: string[], startTimestamp: number, endTimesta
     // NOTE: Cannot use continue because of "unexpected use of continue statement. eslint(no-continue)"
     let isContinue = false;
     if (logs[i]) {
-      const time = DateTime.fromISO(logs[i].date, { zone });
+      const time = DateTime.fromMillis(logs[i].timestamp, { zone });
       if (cur.toFormat('yyyy-MM-dd') === time.toFormat('yyyy-MM-dd')) {
         count += 1;
         users.add(logs[i].user_id);
