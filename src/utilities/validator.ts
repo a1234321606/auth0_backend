@@ -10,7 +10,7 @@ const isInteger = (str: string) => (str ? Number.isInteger(Number(str)) : false)
  * @param {*} str - (String) the string to be verified
  * @returns Boolean
  */
-const isNumber = (str: string) => (str ? !Number.isNaN(Number(str)) : false);
+const isNumber = (str: string) => !!str && !Number.isNaN(Number(str));
 
 /**
  * Check the parameter is empty object or not
@@ -31,13 +31,8 @@ function isEmptyObj(obj: any) {
  * @returns Boolean
  */
 const isLatitude = (str: string) => {
-  try {
-    const num = Number(str);
-    return num >= -90 && num <= 90;
-  } catch (error) {
-    console.error(error);
-  }
-  return false;
+  const num = Number(str);
+  return !!str && num >= -90 && num <= 90;
 };
 
 /**
@@ -46,13 +41,8 @@ const isLatitude = (str: string) => {
  * @returns Boolean
  */
 const isLongitude = (str: string) => {
-  try {
-    const num = Number(str);
-    return num >= -180 && num <= 180;
-  } catch (error) {
-    console.error(error);
-  }
-  return false;
+  const num = Number(str);
+  return !!str && num >= -180 && num <= 180;
 };
 
 /**

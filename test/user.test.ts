@@ -29,13 +29,13 @@ describe('User', () => {
     });
 
     it('shouldn\'t update user if given name is not alphabetic', async () => {
-      const res = await request.put('/users').set({ Authorization: token }).send({ ...data, given_name: '123' });
+      const res = await request.put('/users').set({ Authorization: token }).send({ name: null, given_name: '123', family_name: null });
       expect(res.statusCode).toBe(400);
       expect(res.body.message).toBe('Invalid given name: 123');
     });
 
     it('shouldn\'t update user if family name is not alphabetic', async () => {
-      const res = await request.put('/users').set({ Authorization: token }).send({ ...data, family_name: '456' });
+      const res = await request.put('/users').set({ Authorization: token }).send({ name: null, given_name: null, family_name: '456' });
       expect(res.statusCode).toBe(400);
       expect(res.body.message).toBe('Invalid family name: 456');
     });
@@ -44,6 +44,12 @@ describe('User', () => {
       const res = await request.put('/users').set({ Authorization: token }).send({ ...data, email: 'email address' });
       expect(res.statusCode).toBe(400);
       expect(res.body.message).toBe('Invalid email: email address');
+    });
+
+    it('shouldn\'t update user if body parameter is empty', async () => {
+      const res = await request.put('/users').set({ Authorization: token });
+      expect(res.statusCode).toBe(400);
+      expect(res.body.message).toBe('Invalid body parameter');
     });
   });
 
@@ -101,26 +107,25 @@ describe('User', () => {
       expect(res.statusCode).toBe(400);
       expect(res.body.message).toBe('Invalid confirm password');
     });
+
+    it('shouldn\'t send password change notification email to user if new passwords are not match', async () => {
+      const res = await request.post('/users/change-password').set({ Authorization: token }).send({ ...data, confirm_password: 'New_password' });
+      expect(res.statusCode).toBe(400);
+      expect(res.body.message).toBe('New passwords do not match'); 
+    });
   });
 
   describe('GET /users/stats', () => {
-    const data = { types: ['s'], start_timestamp: Date.now() - 3600000, end_timestamp: Date.now() };
+    const data = { start_timestamp: Date.now() - 3600000, end_timestamp: Date.now() };
 
-    it('should get user statistics by types and time range', async () => {
+    it('should get user statistics by time range', async () => {
       const res = await request.get('/users/stats').set({ Authorization: token }).query(data);
-      console.log('QQ: res=', res.body);
       expect(res.statusCode).toBe(200);
       expect(res.body.counts[res.body.counts.length - 1]).toBe(logs.length);
       expect(res.body.users[res.body.users.length - 1]).toBe(logs.reduce((arr: string[], log: any) => {
         if (!arr.includes(log.user_id)) arr.push(log.user_id);
         return arr;
       }, []).length);
-    });
-
-    it('shouldn\'t get user statistics if types is wrong', async () => {
-      const res = await request.get('/users/stats').set({ Authorization: token }).query({ ...data, types: [''] });
-      expect(res.statusCode).toBe(400);
-      expect(res.body.message).toBe('Invalid types: ');
     });
 
     it('shouldn\'t get user statistics if start timestamp is wrong', async () => {

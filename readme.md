@@ -1,13 +1,14 @@
 [![codecov](https://codecov.io/gh/a1234321606/auth0_backend/graph/badge.svg?token=6MK81NAMR0)](https://codecov.io/gh/a1234321606/auth0_backend)
 
 # Backend for Auth0 Demo
-The goal of this project is to create several APIs, so users can access the dahboard and profile after users sign in. In this project, I've swiftly acquired and applied the new techniques, `Auth0` and `typescript`, in around one week as shown in the timesheet figure.
+The goal of this project is to create several APIs, so users can access the dahboard and profile after users sign in. In this project, I've swiftly acquired and applied the new techniques, `Auth0`, `Retool` and `typescript`, in around one week as shown in the timesheet figure.
 
 ![Timesheet](docs/timesheet.png)
 
 # Technology Stacks
 - Language: NodeJS, Typescript
 - 3rd-Party services/packages: Auth0, Gmail, Koa2
+- Database: Retool
 - Coding Stlyes: Airbnb
 - API Design: Swagger
 - Hosting: [Render](https://render.com)
@@ -45,8 +46,10 @@ Please be aware that our backend service is deployed on Render, which comes with
 ![Demo](docs/demo.gif)
 
 # How to Use
-* Auth0
-  * Signup [Auth0](https://auth0.com/)
+* [Retool](https://retool.com)
+  * Create a table named `auth0_session_logs` in Retool DB
+  * Create a webhook in workflow for Auth0 adds session data to Retool DB
+* [Auth0](https://auth0.com)
   * Create a `machine to machine application` for client crediencials flow
   * Create email provider
   * Create email templates
@@ -55,24 +58,32 @@ Please be aware that our backend service is deployed on Render, which comes with
   * Add an action to login flow
     * `name` & `email` are used for email notification
     * `last_login` is used for user statistics feature
+    * Add `retool_workflow_id` & `retool_workflow_key` to secrets
+    * Add `axios` to dependencies
 
       ```js
       exports.onExecutePostLogin = async (event, api) => {
-      const { user } = event;
-      const namespace = "https://custom.claim"
+        const { user } = event;
+        const namespace = "https://custom.claim";
+        const axios = require('axios');
 
-      if (event.authorization) {
+        if (event.authorization) {
+          const ts = Date.now();
+
           api.idToken.setCustomClaim(`${namespace}/name`, user.user_metadata?.name || user.name);
           api.accessToken.setCustomClaim(`${namespace}/name`, user.user_metadata?.name || user.name);
           api.accessToken.setCustomClaim(`${namespace}/email`, user.email);
-          api.user.setUserMetadata("last_login", Date.now());
-      }
+          api.user.setUserMetadata("last_login", ts);
+
+          const url = `https://api.retool.com/v1/workflows/${secrets.retool_workflow_id}/startTrigger?workflowApiKey=${secrets.retool_workflow_key}`;
+          axios.post(url, { user_id: user.user_id, timestamp: ts });
+        }
       };
       ```
-* SMTP service
-  * Get [application password](https://support.google.com/accounts/answer/185833) for Gmail SMTP service
+* Gmail SMTP
+  * Get [application password](https://support.google.com/accounts/answer/185833)
 * Environment setup
-  * Add Auth0 & Google secrets to the `.env` file
+  * Add Auth0, Retool DB & Google secrets to `.env` file
   * Install packages: `npm i`
-  * Start service: `npm start`
   * Run testing: `npm test`
+  * Start service: `npm start`

@@ -136,23 +136,12 @@ paths:
           $ref: ../common/internalServerError.yaml
   /api/v1/users/stats:
     get:
-      description: "Get log statistics according to the types & time range.
-        Return the trigger count & user count of the all given types in the given time range."
+      description: "Get session statistics by time range.
+        Return trigger count & user count in the given time range."
       summary: API 1.1.7
       tags:
         - User
       parameters:
-        - name: types
-          in: query
-          description: "A list of log type. Ref: https://auth0.com/docs/deploy-monitor/logs/log-event-type-codes"
-          required: true
-          schema:
-            type: array
-            items:
-              type: string
-              example: s
-          style: form
-          explode: true
         - name: start_timestamp
           in: query
           description: The timestamp of start time
