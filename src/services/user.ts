@@ -49,33 +49,29 @@ const getStatistics = async (startTimestamp: number, endTimestamp: number, zone:
   const logs = await userRepo.getSessionLogs(conditions, data);
 
   let cur = DateTime.fromMillis(startTimestamp, { zone });
-  let count = 0;
-  const users = new Set();
-  const result: any = {
-    time: [],
-    counts: [],
-    users: [],
-  };
+  const end = DateTime.fromMillis(endTimestamp, { zone });
+  const result: any = { time: [], counts: [], users: [] };
+  const tmp = { count: 0, users: new Set() };
   for (let i = 0; i <= logs.length;) {
     // NOTE: Cannot use continue because of "unexpected use of continue statement. eslint(no-continue)"
     let isContinue = false;
     if (logs[i]) {
       const time = DateTime.fromMillis(logs[i].timestamp, { zone });
       if (cur.toFormat('yyyy-MM-dd') === time.toFormat('yyyy-MM-dd')) {
-        count += 1;
-        users.add(logs[i].user_id);
+        tmp.count += 1;
+        tmp.users.add(logs[i].user_id);
         i += 1;
         isContinue = true;
       }
     }
     if (!isContinue) {
       result.time.push(cur.toFormat('yyyy-MM-dd'));
-      result.counts.push(count);
-      result.users.push(users.size);
-      count = 0;
-      users.clear();
-      if (!logs[i]) break;
+      result.counts.push(tmp.count);
+      result.users.push(tmp.users.size);
+      tmp.count = 0;
+      tmp.users.clear();
       cur = cur.plus({ day: 1 });
+      if (!logs[i] && cur > end) break;
     }
   }
   return result;
